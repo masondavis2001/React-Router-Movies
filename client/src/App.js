@@ -1,36 +1,33 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import React, { Component } from 'react';
+import { Route } from 'react-router-dom';
 
 import SavedList from './Movies/SavedList';
+import MovieList from './Movies/MovieList';
+import Movie from './Movies/Movie';
 
-const App = () => {
-  const [saved, setSaved] = useState([]); // Stretch: the ids of "saved" movies
-  const [movieList, setMovieList] = useState([]);
+export default class App extends Component {
+  constructor() {
+    super();
+    this.state = {
+      savedList: []
+    };
+  }
 
-  useEffect(() => {
-    const getMovies = () => {
-      axios
-        .get('http://localhost:5000/api/movies')
-        .then(response => {
-          setMovieList(response.data);
-        })
-        .catch(error => {
-          console.error('Server Error', error);
-        });
-    }
-    getMovies();
-  }, []);
-
-  const addToSavedList = id => {
-    // This is stretch. Prevent the same movie from being "saved" more than once
+  addToSavedList = movie => {
+    const savedList = this.state.savedList;
+    savedList.push(movie);
+    this.setState({ savedList });
   };
 
-  return (
-    <div>
-      <SavedList list={[ /* This is stretch */]} />
-      <div>Replace this Div with your Routes</div>
-    </div>
-  );
-};
-
-export default App;
+  render() {
+    return (
+      <div>
+        <SavedList list={this.state.savedList} />
+        <Route path="/" exact render={props => <MovieList {...props} addToSavedList={this.addToSavedList} />}
+        />
+        <Route path="/movies/:id" render={props => <Movie {...props} addToSavedList={this.addToSavedList} />}
+        />
+      </div>
+    );
+  }
+}
